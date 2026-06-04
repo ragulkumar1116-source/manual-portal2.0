@@ -478,162 +478,156 @@
 
   <!-- Modal 1: Add / Edit Income -->
   <div class="modal-backdrop" id="income-modal">
-    <div class="modal scale-up">
+    <form id="income-form" class="modal scale-up">
       <div class="modal-header">
         <h3 class="modal-title" id="income-modal-title"><i data-lucide="plus-circle" style="color: var(--income);"></i> Add Income</h3>
         <button class="modal-close"><i data-lucide="x"></i></button>
       </div>
-      <form id="income-form">
-        <input type="hidden" id="income-id">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="income-amount" class="form-label">Amount (₹)</label>
-            <input type="number" id="income-amount" class="form-input" placeholder="0.00" step="0.01" required min="0.01">
-          </div>
+      <input type="hidden" id="income-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="income-amount" class="form-label">Amount (₹)</label>
+          <input type="number" id="income-amount" class="form-input" placeholder="0.00" step="0.01" required min="0.01">
+        </div>
 
-          <div class="form-group">
-            <label class="form-label">Category</label>
-            <div class="chips-container" id="income-chips-wrapper">
-              <div class="chip active" data-val="Salary">Salary</div>
-              <div class="chip" data-val="Bonus">Bonus</div>
-              <div class="chip" data-val="Freelance">Freelance</div>
-              <div class="chip" data-val="Business">Business</div>
-              <div class="chip" data-val="Other">Other</div>
-              <!-- Custom categories injected here -->
-            </div>
-            <input type="text" id="income-category" class="form-input" style="margin-top: 0.5rem;" placeholder="Or type category manually..." value="Salary" required>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <div class="chips-container" id="income-chips-wrapper">
+            <div class="chip active" data-val="Salary">Salary</div>
+            <div class="chip" data-val="Bonus">Bonus</div>
+            <div class="chip" data-val="Freelance">Freelance</div>
+            <div class="chip" data-val="Business">Business</div>
+            <div class="chip" data-val="Other">Other</div>
+            <!-- Custom categories injected here -->
           </div>
+          <input type="text" id="income-category" class="form-input" style="margin-top: 0.5rem;" placeholder="Or type category manually..." value="Salary" required>
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="income-date" class="form-label">Date</label>
-              <input type="date" id="income-date" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label for="income-time" class="form-label">Time</label>
-              <input type="time" id="income-time" class="form-input" required>
-            </div>
-          </div>
-
+        <div class="form-row">
           <div class="form-group">
-            <label for="income-note" class="form-label">Notes</label>
-            <textarea id="income-note" class="form-textarea" rows="2" placeholder="Describe this income source..."></textarea>
+            <label for="income-date" class="form-label">Date</label>
+            <input type="date" id="income-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="income-time" class="form-label">Time</label>
+            <input type="time" id="income-time" class="form-input" required>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-          <button type="submit" class="btn btn-income" id="income-save-btn">Save Income</button>
+
+        <div class="form-group">
+          <label for="income-note" class="form-label">Notes</label>
+          <textarea id="income-note" class="form-textarea" rows="2" placeholder="Describe this income source..."></textarea>
         </div>
-      </form>
-    </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+        <button type="submit" class="btn btn-income" id="income-save-btn">Save Income</button>
+      </div>
+    </form>
   </div>
 
   <!-- Modal 2: Add / Edit Expense -->
   <div class="modal-backdrop" id="expense-modal">
-    <div class="modal scale-up">
+    <form id="expense-form" class="modal scale-up">
       <div class="modal-header">
         <h3 class="modal-title" id="expense-modal-title"><i data-lucide="minus-circle" style="color: var(--expense);"></i> Add Expense</h3>
         <button class="modal-close"><i data-lucide="x"></i></button>
       </div>
-      <form id="expense-form">
-        <input type="hidden" id="expense-id">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="expense-amount" class="form-label">Amount (₹)</label>
-            <input type="number" id="expense-amount" class="form-input" placeholder="0.00" step="0.01" required min="0.01">
-          </div>
+      <input type="hidden" id="expense-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="expense-amount" class="form-label">Amount (₹)</label>
+          <input type="number" id="expense-amount" class="form-input" placeholder="0.00" step="0.01" required min="0.01">
+        </div>
 
-          <div class="form-group">
-            <label class="form-label">Category</label>
-            <div class="chips-container" id="expense-chips-wrapper">
-              <div class="chip active" data-val="Food">Food</div>
-              <div class="chip" data-val="Travel">Travel</div>
-              <div class="chip" data-val="Shopping">Shopping</div>
-              <div class="chip" data-val="Medical">Medical</div>
-              <div class="chip" data-val="Personal">Personal</div>
-              <div class="chip" data-val="Utility Bills">Utility Bills</div>
-              <div class="chip" data-val="Other">Other</div>
-              <!-- Custom categories injected here -->
-            </div>
-            <input type="text" id="expense-category" class="form-input" style="margin-top: 0.5rem;" placeholder="Or type category manually..." value="Food" required>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <div class="chips-container" id="expense-chips-wrapper">
+            <div class="chip active" data-val="Food">Food</div>
+            <div class="chip" data-val="Travel">Travel</div>
+            <div class="chip" data-val="Shopping">Shopping</div>
+            <div class="chip" data-val="Medical">Medical</div>
+            <div class="chip" data-val="Personal">Personal</div>
+            <div class="chip" data-val="Utility Bills">Utility Bills</div>
+            <div class="chip" data-val="Other">Other</div>
+            <!-- Custom categories injected here -->
           </div>
+          <input type="text" id="expense-category" class="form-input" style="margin-top: 0.5rem;" placeholder="Or type category manually..." value="Food" required>
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="expense-date" class="form-label">Date</label>
-              <input type="date" id="expense-date" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label for="expense-time" class="form-label">Time</label>
-              <input type="time" id="expense-time" class="form-input" required>
-            </div>
-          </div>
-
+        <div class="form-row">
           <div class="form-group">
-            <label for="expense-note" class="form-label">Notes</label>
-            <textarea id="expense-note" class="form-textarea" rows="2" placeholder="Describe this spending..."></textarea>
+            <label for="expense-date" class="form-label">Date</label>
+            <input type="date" id="expense-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="expense-time" class="form-label">Time</label>
+            <input type="time" id="expense-time" class="form-input" required>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-          <button type="submit" class="btn btn-danger" id="expense-save-btn">Save Expense</button>
+
+        <div class="form-group">
+          <label for="expense-note" class="form-label">Notes</label>
+          <textarea id="expense-note" class="form-textarea" rows="2" placeholder="Describe this spending..."></textarea>
         </div>
-      </form>
-    </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+        <button type="submit" class="btn btn-danger" id="expense-save-btn">Save Expense</button>
+      </div>
+    </form>
   </div>
 
   <!-- Modal 3: Add / Edit Vehicle Expense -->
   <div class="modal-backdrop" id="vehicle-modal">
-    <div class="modal scale-up">
+    <form id="vehicle-form" class="modal scale-up">
       <div class="modal-header">
         <h3 class="modal-title" id="vehicle-modal-title"><i data-lucide="car" style="color: var(--balance);"></i> Log Vehicle Expense</h3>
         <button class="modal-close"><i data-lucide="x"></i></button>
       </div>
-      <form id="vehicle-form">
-        <input type="hidden" id="vehicle-id">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="vehicle-type" class="form-label">Vehicle Type</label>
-            <select id="vehicle-type" class="form-select" required>
-              <option value="car">Car</option>
-              <option value="bike">Bike</option>
-            </select>
-          </div>
+      <input type="hidden" id="vehicle-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="vehicle-type" class="form-label">Vehicle Type</label>
+          <select id="vehicle-type" class="form-select" required>
+            <option value="car">Car</option>
+            <option value="bike">Bike</option>
+          </select>
+        </div>
 
-          <div class="form-group">
-            <label for="vehicle-amount" class="form-label">Amount (₹)</label>
-            <input type="number" id="vehicle-amount" class="form-input" placeholder="0.00" step="0.01" required min="0.01">
-          </div>
+        <div class="form-group">
+          <label for="vehicle-amount" class="form-label">Amount (₹)</label>
+          <input type="number" id="vehicle-amount" class="form-input" placeholder="0.00" step="0.01" required min="0.01">
+        </div>
 
-          <div class="form-group">
-            <label for="vehicle-category" class="form-label">Expense Category</label>
-            <select id="vehicle-category" class="form-select" required>
-              <!-- Populated dynamically based on Vehicle type choice -->
-            </select>
-          </div>
+        <div class="form-group">
+          <label for="vehicle-category" class="form-label">Expense Category</label>
+          <select id="vehicle-category" class="form-select" required>
+            <!-- Populated dynamically based on Vehicle type choice -->
+          </select>
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="vehicle-date" class="form-label">Date</label>
-              <input type="date" id="vehicle-date" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label for="vehicle-time" class="form-label">Time</label>
-              <input type="time" id="vehicle-time" class="form-input" required>
-            </div>
-          </div>
-
+        <div class="form-row">
           <div class="form-group">
-            <label for="vehicle-note" class="form-label">Notes</label>
-            <textarea id="vehicle-note" class="form-textarea" rows="2" placeholder="Add invoice details or comments..."></textarea>
+            <label for="vehicle-date" class="form-label">Date</label>
+            <input type="date" id="vehicle-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="vehicle-time" class="form-label">Time</label>
+            <input type="time" id="vehicle-time" class="form-input" required>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="vehicle-save-btn">Log Expense</button>
+
+        <div class="form-group">
+          <label for="vehicle-note" class="form-label">Notes</label>
+          <textarea id="vehicle-note" class="form-textarea" rows="2" placeholder="Add invoice details or comments..."></textarea>
         </div>
-      </form>
-    </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="vehicle-save-btn">Log Expense</button>
+      </div>
+    </form>
   </div>
 
   <!-- Modal 4: View Transaction Details -->
