@@ -1196,7 +1196,7 @@ body {
   .main-content {
     height: auto;
     min-height: 100vh;
-    padding-bottom: 70px; /* Space for bottom nav */
+    padding-bottom: 80px; /* Space for bottom nav */
   }
 
   .main-header {
@@ -1272,13 +1272,118 @@ body {
   .filters-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem;
   }
   
   .filter-controls {
     justify-content: space-between;
+    width: 100%;
   }
 
   .theme-options {
     grid-template-columns: 1fr;
+  }
+
+  .cat-manager-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.5rem;
+  }
+}
+
+/* Extra Small Devices (Smartphones) */
+@media (max-width: 576px) {
+  .main-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  #quick-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  #quick-action-buttons button {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .filter-controls select {
+    width: 100% !important;
+  }
+
+  #tx-custom-date-inputs {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Premium Bottom-Sheet Modals for Mobile */
+  .modal-backdrop {
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: 100%;
+    width: 100%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: var(--border-radius-xl);
+    border-top-right-radius: var(--border-radius-xl);
+    max-height: 85vh;
+    transform: translateY(100%);
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal-backdrop.show .modal {
+    transform: translateY(0);
+  }
+
+  .chart-container {
+    min-height: 200px;
+    max-height: 250px;
+  }
+  
+  .charts-grid {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .auth-title {
+    font-size: 1.25rem;
+  }
+
+  .auth-subtitle {
+    margin-bottom: 1.25rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr; /* Stack summary cards on very small screens */
+  }
+
+  .calendar-cell {
+    font-size: 0.75rem;
+  }
+
+  .calendar-day-header {
+    font-size: 0.65rem;
   }
 }
