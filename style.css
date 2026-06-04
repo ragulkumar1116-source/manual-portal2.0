@@ -442,7 +442,8 @@ body {
 .app-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Sidebar Navigation */
@@ -1027,6 +1028,10 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-md);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .transaction-item:hover {
@@ -1187,6 +1192,8 @@ body {
 @media (max-width: 768px) {
   .app-layout {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
   
   .sidebar {
@@ -1196,6 +1203,7 @@ body {
   .main-content {
     height: auto;
     min-height: 100vh;
+    overflow: visible;
     padding-bottom: 80px; /* Space for bottom nav */
   }
 
