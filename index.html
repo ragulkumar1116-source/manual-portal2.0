@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Money Manager Pro</title>
+  <meta name="description" content="Securely log in to Money Manager Pro to track your incomes, expenses, vehicle tracking, custom categories, reports and dashboards.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase Compat Library Core CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Toast Notifications Area -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <div class="auth-wrapper">
+    <div class="auth-container">
+      <div class="auth-logo-area">
+        <h1 class="auth-logo" id="main-logo-heading">
+          <i data-lucide="wallet"></i> Money Manager Pro
+        </h1>
+      </div>
+      
+      <div class="card panel-glass auth-card">
+        <h2 class="auth-title">Welcome Back</h2>
+        <p class="auth-subtitle">Log in to manage your money with ease</p>
+        
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="e.g. name@example.com" required autocomplete="email">
+          </div>
+          
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+          </div>
+          
+          <button type="submit" id="login-submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+            <span>Log In</span>
+          </button>
+        </form>
+        
+        <div class="auth-actions">
+          <a href="forgot.html" class="btn btn-secondary" id="forgot-password-link">
+            <i data-lucide="key-round"></i> Forgot Password?
+          </a>
+          <a href="newuser.html" class="btn btn-secondary" id="create-account-link">
+            <i data-lucide="user-plus"></i> Create New Account
+          </a>
+        </div>
+      </div>
+      
+      <div class="auth-footer">
+        <p>© 2026 Money Manager Pro. Secure data processing.</p>
+        <div id="fallback-badge" style="margin-top: 0.5rem; font-size: 0.75rem; opacity: 0.8; display: none;">
+          <span style="background-color: var(--primary-glow); color: var(--primary); padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: bold; border: 1px solid var(--primary);">
+            Mock Preview Active
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Services and Logic Scripts -->
+  <script src="firebase.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
