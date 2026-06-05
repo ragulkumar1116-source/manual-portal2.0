@@ -1520,12 +1520,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Formats date YYYY-MM-DD to DD-MM-YYYY or readable string
-  function formatDate(dateStr) {
+function formatDate(dateStr) {
     if (!dateStr) return "N/A";
     const parts = dateStr.split('-');
     if (parts.length !== 3) return dateStr;
-    return `${parts[2]}-${parts[1]}-${parts[0]}`;
-  }
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
 
   // Helper date key formatter
   function formatDateKey(dateObj) {
