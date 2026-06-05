@@ -166,3 +166,10 @@
     // Run
     loadFirebase(init);
 })();
+
+if (isManual) {
+    const info = document.getElementById('lic-info');
+    info.className = "lic-status t-ok";
+    info.innerHTML = `✅ Welcome, ${data.user || 'Authorized User'}!`;
+    setTimeout(() => location.reload(), 1500);
+}
