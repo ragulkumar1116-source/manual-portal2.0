@@ -74,6 +74,10 @@
   <!-- Shared Services and Logic Scripts -->
   <script src="firebase.js"></script>
   <script src="index.js"></script>
-  <script src="license.js"></script>
+ <script>
+if (!localStorage.getItem("licenseKey")) {
+    window.location.href = "license.html";
+}
+</script>
 </body>
 </html>
