@@ -1,10 +1,10 @@
 /**
- * UNIFIED LICENSE SYSTEM - CLIENT SIDE
- * Handles: UI, Validation, Real-time Kill-switch, and Domain Locking.
+ * MONEY MANAGER PRO - UNIFIED LICENSE SYSTEM
+ * Security Architecture: Gatekeeper Pattern (Client Defended)
  */
 (function () {
-    // 1. Firebase Configuration (Matches your Admin/Auth)
-    const firebaseConfig = {
+    // 1. License Database Configuration
+    const licFirebaseConfig = {
         apiKey: "AIzaSyAMnnp5WiV3HAlPSUX73GqG6zxwQRXSpuA",
         authDomain: "lickey-33267.firebaseapp.com",
         databaseURL: "https://lickey-33267-default-rtdb.firebaseio.com",
@@ -15,154 +15,154 @@
         measurementId: "G-1ZZ1RRZKB2"
     };
 
-    // 2. Load Firebase Compatibility Scripts Dynamically
-    function loadFirebase(callback) {
-        if (window.firebase) return callback();
-        const s1 = document.createElement("script");
-        s1.src = "https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js";
-        s1.onload = () => {
-            const s2 = document.createElement("script");
-            s2.src = "https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js";
-            s2.onload = callback;
-            document.head.appendChild(s2);
-        };
-        document.head.appendChild(s1);
+    let licDb;
+
+    function initLicenseSystem() {
+        // Safe check for multi-app initialization variants
+        const licApp = firebase.initializeApp(licFirebaseConfig, "licSystemInstance");
+        licDb = licApp.database();
+        
+        const storedKey = localStorage.getItem("mmp_license_key");
+
+        if (!storedKey) {
+            showLicUI();
+        } else {
+            validateLic(storedKey);
+        }
     }
 
-    function init() {
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const storedKey = localStorage.getItem("licenseKey");
-
-        // Helper: Sync with Firebase Server Time (Prevents Local Clock Cheating)
-        function getServerTime() {
-            return new Promise((res) => {
-                db.ref("/.info/serverTimeOffset").once("value", (snap) => {
-                    res(Date.now() + (snap.val() || 0));
-                });
+    // Prevents system clock manipulation tricks
+    function getNetworkTime() {
+        return new Promise((resolve) => {
+            licDb.ref("/.info/serverTimeOffset").once("value", (snap) => {
+                resolve(Date.now() + (snap.val() || 0));
             });
-        }
+        });
+    }
 
-        // UI: Style Injection
-        const injectStyles = () => {
-            if (document.getElementById('lic-styles')) return;
-            const style = document.createElement("style");
-            style.id = 'lic-styles';
-            style.innerHTML = `
-                .lic-wrap { position:fixed; top:0; left:0; width:100%; height:100vh; background:#0f0c29; background:linear-gradient(to bottom, #24243e, #1a1a2e, #0f0c29); display:flex; justify-content:center; align-items:center; z-index:9999999; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; }
-                .lic-box { background:#16213e; padding:3rem; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.6); width:90%; max-width:420px; text-align:center; border:1px solid #e94560; }
-                .lic-box h2 { margin:0 0 10px; color:#e94560; font-size:1.8rem; }
-                .lic-box p { color: #94a3b8; margin-bottom: 25px; }
-                .lic-in { width:100%; padding:14px; margin-bottom:20px; border-radius:10px; border:1px solid #0f3460; background:#1a1a2e; color:white; font-size:1.1rem; text-align:center; box-sizing:border-box; outline:none; }
-                .lic-in:focus { border-color: #e94560; box-shadow: 0 0 10px rgba(233, 69, 96, 0.3); }
-                .lic-btn { background:#e94560; color:white; border:none; padding:14px; border-radius:10px; cursor:pointer; font-weight:bold; width:100%; font-size:1rem; text-transform:uppercase; letter-spacing:1px; transition: 0.3s; }
-                .lic-btn:hover { background:#ff4d6d; transform: translateY(-2px); }
-                .lic-status { margin-top:20px; font-weight: 500; min-height: 24px; }
-                .t-err { color:#ff4e4e; } .t-ok { color:#4eff8a; }
-            `;
-            document.head.appendChild(style);
-        };
+    function injectLicStyles() {
+        if (document.getElementById('lic-core-styles')) return;
+        const style = document.createElement("style");
+        style.id = 'lic-core-styles';
+        style.innerHTML = `
+            .lic-wrap { position:fixed; top:0; left:0; width:100%; height:100vh; background:#0f0c29; background:linear-gradient(to bottom, #1e1b4b, #0f172a, #020617); display:flex; justify-content:center; align-items:center; z-index:9999999; font-family: system-ui, -apple-system, sans-serif; color: white; }
+            .lic-box { background:#1e293b; padding:2.5rem; border-radius:16px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); width:90%; max-width:400px; text-align:center; border:1px solid #334155; }
+            .lic-box h2 { margin:0 0 8px; color:#f43f5e; font-size:1.6rem; font-weight:700; }
+            .lic-box p { color: #94a3b8; margin-bottom: 24px; font-size:0.95rem; line-height:1.5; }
+            .lic-in { width:100%; padding:14px; margin-bottom:16px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:white; font-size:1.1rem; text-align:center; box-sizing:border-box; outline:none; font-family:monospace; letter-spacing:1px; }
+            .lic-in:focus { border-color: #f43f5e; box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.2); }
+            .lic-btn { background:#f43f5e; color:white; border:none; padding:14px; border-radius:8px; cursor:pointer; font-weight:600; width:100%; font-size:1rem; transition: 0.2s ease; }
+            .lic-btn:hover { background:#e11d48; }
+            .lic-status { margin-top:16px; font-weight: 500; font-size:0.9rem; min-height: 20px; }
+            .t-err { color:#f87171; } .t-ok { color:#4ade80; }
+        `;
+        document.head.appendChild(style);
+    }
 
-        // UI: Display the Activation Overlay
-        function showUI(msg = "Enter your license key to continue", isErr = false) {
-            injectStyles();
-            // Prevent scrolling behind the overlay
-            document.body.style.overflow = "hidden";
-            
-            document.body.innerHTML = `
-                <div class="lic-wrap">
-                    <div class="lic-box">
-                        <h2>🔐 System Locked</h2>
-                        <p id="lic-p-msg">${msg}</p>
-                        <input type="text" id="lic-field" class="lic-in" placeholder="XXXX-XXXX-XXXX-XXXX">
-                        <button class="lic-btn" onclick="window.verifyAction()">Activate System</button>
-                        <div id="lic-info" class="lic-status ${isErr ? 't-err' : ''}"></div>
-                    </div>
-                </div>
-            `;
+    function showLicUI(errMsg = "Activation key required to access Money Manager Pro.", isErr = false) {
+        injectLicStyles();
+        document.body.style.overflow = "hidden";
+        document.getElementById("app-secure-container").style.display = "none";
 
-            window.verifyAction = async () => {
-                const key = document.getElementById('lic-field').value.trim();
-                const info = document.getElementById('lic-info');
-                if (!key) return info.innerHTML = "❌ Please enter a key.";
-                info.className = "lic-status";
-                info.innerHTML = "⌛ Verifying license...";
-                validate(key, true);
-            };
-        }
+        const root = document.getElementById("license-overlay-root");
+        root.innerHTML = `
+            <div class="lic-wrap">
+              <div class="lic-box">
+                <h2>🔐 Software Lock</h2>
+                <p id="lic-desc-msg">${errMsg}</p>
+                <input type="text" id="lic-input-field" class="lic-in" placeholder="XXXX-XXXX-XXXX-XXXX" value="${localStorage.getItem("mmp_license_key") || ''}">
+                <button class="lic-btn" id="lic-auth-btn">Activate Instance</button>
+                <div id="lic-feedback" class="lic-status ${isErr ? 't-err' : ''}"></div>
+              </div>
+            </div>
+        `;
 
-        // Core Logic: Validation
-        async function validate(key, isManual = false) {
-            try {
-                const snap = await db.ref("licenses/" + key).once("value");
-                const data = snap.val();
-                const now = await getServerTime();
+        document.getElementById("lic-auth-btn").addEventListener("click", () => {
+            const key = document.getElementById('lic-input-field').value.trim();
+            const feedback = document.getElementById('lic-feedback');
+            if (!key) {
+                feedback.className = "lic-status t-err";
+                feedback.innerHTML = "❌ Key input cannot be blank.";
+                return;
+            }
+            feedback.className = "lic-status";
+            feedback.innerHTML = "⌛ Validating platform registry...";
+            validateLic(key, true);
+        });
+    }
 
-                // 1. Check if key exists
-                if (!data) throw new Error("Key not found in database.");
+    async function validateLic(key, isManualTrigger = false) {
+        try {
+            const snap = await licDb.ref("licenses/" + key).once("value");
+            const data = snap.val();
+            const currentTime = await getNetworkTime();
 
-                // 2. Check Status
-                if (data.status !== "active") throw new Error("This license has been disabled.");
+            if (!data) throw new Error("License key matching record not found.");
+            if (data.status !== "active") throw new Error("This developer license has been suspended.");
+            if (data.expiry && currentTime > data.expiry) {
+                throw new Error("Expired: " + new Date(data.expiry).toLocaleDateString());
+            }
 
-                // 3. Check Expiry
-                if (data.expiry && now > data.expiry) throw new Error("License expired on " + new Date(data.expiry).toLocaleDateString());
+            // Domain Matching
+            const host = window.location.hostname;
+            if (data.domain && data.domain !== "" && data.domain !== "localhost" && data.domain !== "127.0.0.1") {
+                if (host !== data.domain) throw new Error("Unlicensed domain space: " + host);
+            }
 
-                // 4. Check Domain Locking (if set in Admin)
-                const currentHost = window.location.hostname;
-                if (data.domain && data.domain !== "" && data.domain !== "localhost") {
-                    if (currentHost !== data.domain) throw new Error("This key is locked to: " + data.domain);
-                }
+            // Success Execution
+            localStorage.setItem("mmp_license_key", key);
 
-                // Success Actions
-                localStorage.setItem("licenseKey", key);
+            if (isManualTrigger) {
+                const feedback = document.getElementById('lic-feedback');
+                feedback.className = "lic-status t-ok";
+                feedback.innerHTML = `✅ Confirmed. Registered to ${data.user || 'Enterprise Operator'}`;
+                setTimeout(() => {
+                    location.reload();
+                }, 1200);
+            } else {
+                // Remove locks and mount primary app context safely
+                document.getElementById("license-overlay-root").innerHTML = "";
+                document.body.style.overflow = "auto";
+                document.getElementById("app-secure-container").style.display = "block";
                 
-                if (isManual) {
-                    const info = document.getElementById('lic-info');
-                    info.className = "lic-status t-ok";
-                    info.innerHTML = `✅ Welcome, ${data.user || 'Authorized User'}!`;
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    // Start the real-time listener for "Live Kill-switch"
-                    startKiller(key);
-                }
+                // Track backend changes continuously
+                attachLiveKillswitch(key);
+            }
 
-            } catch (e) {
-                localStorage.removeItem("licenseKey");
-                if (isManual) {
-                    const info = document.getElementById('lic-info');
-                    info.className = "lic-status t-err";
-                    info.innerHTML = "❌ " + e.message;
-                } else {
-                    showUI(e.message, true);
-                }
+        } catch (err) {
+            localStorage.removeItem("mmp_license_key");
+            if (isManualTrigger) {
+                const feedback = document.getElementById('lic-feedback');
+                feedback.className = "lic-status t-err";
+                feedback.innerHTML = "❌ " + err.message;
+            } else {
+                showLicUI(err.message, true);
             }
         }
-
-        // Kill-switch: Listens for changes while user is browsing
-        function startKiller(key) {
-            db.ref("licenses/" + key).on("value", async (snap) => {
-                const data = snap.val();
-                const now = await getServerTime();
-                
-                const isInvalid = !data || 
-                                  data.status !== "active" || 
-                                  (data.expiry && now > data.expiry);
-
-                if (isInvalid) {
-                    localStorage.removeItem("licenseKey");
-                    location.reload(); // Force trigger showUI
-                }
-            });
-        }
-
-        // Entry Logic
-        if (!storedKey) {
-            showUI();
-        } else {
-            validate(storedKey);
-        }
     }
 
-    // Run
-    loadFirebase(init);
+    function attachLiveKillswitch(key) {
+        licDb.ref("licenses/" + key).on("value", async (snap) => {
+            const data = snap.val();
+            const currentTime = await getNetworkTime();
+
+            const dropInstance = !data || 
+                                 data.status !== "active" || 
+                                 (data.expiry && currentTime > data.expiry);
+
+            if (dropInstance) {
+                localStorage.removeItem("mmp_license_key");
+                location.reload(); 
+            }
+        });
+    }
+
+    // Dynamic Engine Checker
+    if (window.firebase) {
+        initLicenseSystem();
+    } else {
+        window.addEventListener('load', () => {
+            if(window.firebase) initLicenseSystem();
+        });
+    }
 })();
