@@ -1,9 +1,9 @@
 /**
- * UNIFIED LICENSE SYSTEM - CLIENT SIDE
- * Handles: UI, Validation, Real-time Kill-switch, and Domain Locking.
+ * UNIFIED SYSTEM: License Validation + Login Controller
  */
+
 (function () {
-    // 1. Firebase Configuration (Matches your Admin/Auth)
+    // --- 1. CONFIGURATION ---
     const firebaseConfig = {
         apiKey: "AIzaSyAMnnp5WiV3HAlPSUX73GqG6zxwQRXSpuA",
         authDomain: "lickey-33267.firebaseapp.com",
@@ -15,7 +15,7 @@
         measurementId: "G-1ZZ1RRZKB2"
     };
 
-    // 2. Load Firebase Compatibility Scripts Dynamically
+    // --- 2. LICENSE SYSTEM LOGIC ---
     function loadFirebase(callback) {
         if (window.firebase) return callback();
         const s1 = document.createElement("script");
@@ -29,251 +29,181 @@
         document.head.appendChild(s1);
     }
 
-    function init() {
+    function initLicenseSystem() {
+        // Double check body exists, if not wait a split second
+        if (!document.body) {
+            setTimeout(initLicenseSystem, 50);
+            return;
+        }
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const storedKey = localStorage.getItem("licenseKey");
 
-        // Helper: Sync with Firebase Server Time (Prevents Local Clock Cheating)
-        function getServerTime() {
+        const getServerTime = () => {
             return new Promise((res) => {
                 db.ref("/.info/serverTimeOffset").once("value", (snap) => {
                     res(Date.now() + (snap.val() || 0));
                 });
             });
-        }
+        };
 
-        // UI: Style Injection
         const injectStyles = () => {
             if (document.getElementById('lic-styles')) return;
             const style = document.createElement("style");
             style.id = 'lic-styles';
             style.innerHTML = `
-                .lic-wrap { position:fixed; top:0; left:0; width:100%; height:100vh; background:#0f0c29; background:linear-gradient(to bottom, #24243e, #1a1a2e, #0f0c29); display:flex; justify-content:center; align-items:center; z-index:9999999; font-family: 'Segoe UI', Tahoma, sans-serif; color: white; }
+                .lic-wrap { position:fixed; top:0; left:0; width:100%; height:100vh; background:linear-gradient(to bottom, #24243e, #1a1a2e, #0f0c29); display:flex; justify-content:center; align-items:center; z-index:9999999; font-family: sans-serif; color: white; }
                 .lic-box { background:#16213e; padding:3rem; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.6); width:90%; max-width:420px; text-align:center; border:1px solid #e94560; }
-                .lic-box h2 { margin:0 0 10px; color:#e94560; font-size:1.8rem; }
-                .lic-box p { color: #94a3b8; margin-bottom: 25px; }
-                .lic-in { width:100%; padding:14px; margin-bottom:20px; border-radius:10px; border:1px solid #0f3460; background:#1a1a2e; color:white; font-size:1.1rem; text-align:center; box-sizing:border-box; outline:none; }
-                .lic-in:focus { border-color: #e94560; box-shadow: 0 0 10px rgba(233, 69, 96, 0.3); }
-                .lic-btn { background:#e94560; color:white; border:none; padding:14px; border-radius:10px; cursor:pointer; font-weight:bold; width:100%; font-size:1rem; text-transform:uppercase; letter-spacing:1px; transition: 0.3s; }
-                .lic-btn:hover { background:#ff4d6d; transform: translateY(-2px); }
-                .lic-status { margin-top:20px; font-weight: 500; min-height: 24px; }
+                .lic-box h2 { margin:0 0 10px; color:#e94560; }
+                .lic-in { width:100%; padding:14px; margin-bottom:20px; border-radius:10px; border:1px solid #0f3460; background:#1a1a2e; color:white; box-sizing:border-box; }
+                .lic-btn { background:#e94560; color:white; border:none; padding:14px; border-radius:10px; cursor:pointer; font-weight:bold; width:100%; }
+                .lic-status { margin-top:20px; min-height: 24px; }
                 .t-err { color:#ff4e4e; } .t-ok { color:#4eff8a; }
             `;
             document.head.appendChild(style);
         };
 
-        // UI: Display the Activation Overlay
-        function showUI(msg = "Enter your license key to continue", isErr = false) {
+        window.showUI = (msg = "Enter your license key to continue", isErr = false) => {
             injectStyles();
-            // Prevent scrolling behind the overlay
             document.body.style.overflow = "hidden";
             
-            document.body.innerHTML = `
+            // Remove old overlay if it exists
+            const oldOverlay = document.getElementById("lic-overlay");
+            if (oldOverlay) oldOverlay.remove();
+
+            const ui = document.createElement('div');
+            ui.id = "lic-overlay";
+            ui.innerHTML = `
                 <div class="lic-wrap">
                     <div class="lic-box">
                         <h2>🔐 System Locked</h2>
-                        <p id="lic-p-msg">${msg}</p>
+                        <p>${msg}</p>
                         <input type="text" id="lic-field" class="lic-in" placeholder="XXXX-XXXX-XXXX-XXXX">
                         <button class="lic-btn" onclick="window.verifyAction()">Activate System</button>
                         <div id="lic-info" class="lic-status ${isErr ? 't-err' : ''}"></div>
                     </div>
-                </div>
-            `;
+                </div>`;
+            document.body.appendChild(ui);
 
             window.verifyAction = async () => {
                 const key = document.getElementById('lic-field').value.trim();
                 const info = document.getElementById('lic-info');
                 if (!key) return info.innerHTML = "❌ Please enter a key.";
-                info.className = "lic-status";
-                info.innerHTML = "⌛ Verifying license...";
+                info.innerHTML = "⌛ Verifying...";
                 validate(key, true);
             };
-        }
+        };
 
-        // Core Logic: Validation
         async function validate(key, isManual = false) {
             try {
                 const snap = await db.ref("licenses/" + key).once("value");
                 const data = snap.val();
                 const now = await getServerTime();
 
-                // 1. Check if key exists
-                if (!data) throw new Error("Key not found in database.");
-
-                // 2. Check Status
-                if (data.status !== "active") throw new Error("This license has been disabled.");
-
-                // 3. Check Expiry
-                if (data.expiry && now > data.expiry) throw new Error("License expired on " + new Date(data.expiry).toLocaleDateString());
-
-                // 4. Check Domain Locking (if set in Admin)
-                const currentHost = window.location.hostname;
-                if (data.domain && data.domain !== "" && data.domain !== "localhost") {
-                    if (currentHost !== data.domain) throw new Error("This key is locked to: " + data.domain);
-                }
-
-                // Success Actions
-                localStorage.setItem("licenseKey", key);
+                if (!data) throw new Error("Key not found.");
+                if (data.status !== "active") throw new Error("License disabled.");
+                if (data.expiry && now > data.expiry) throw new Error("License expired.");
                 
-                if (isManual) {
-                    const info = document.getElementById('lic-info');
-                    info.className = "lic-status t-ok";
-                    info.innerHTML = `✅ Welcome, ${data.user || 'Authorized User'}!`;
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    // Start the real-time listener for "Live Kill-switch"
-                    startKiller(key);
+                const currentHost = window.location.hostname;
+                if (data.domain && data.domain !== "" && data.domain !== "localhost" && currentHost !== data.domain) {
+                    throw new Error("Locked to: " + data.domain);
                 }
 
+                localStorage.setItem("licenseKey", key);
+                if (isManual) {
+                    document.getElementById('lic-info').innerHTML = "✅ Success!";
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    startKiller(key);
+                    initLoginController(); // License passed! Launch the app login.
+                }
             } catch (e) {
                 localStorage.removeItem("licenseKey");
-                if (isManual) {
-                    const info = document.getElementById('lic-info');
-                    info.className = "lic-status t-err";
-                    info.innerHTML = "❌ " + e.message;
-                } else {
-                    showUI(e.message, true);
-                }
+                if (isManual) document.getElementById('lic-info').innerHTML = "❌ " + e.message;
+                else window.showUI(e.message, true);
             }
         }
 
-        // Kill-switch: Listens for changes while user is browsing
         function startKiller(key) {
             db.ref("licenses/" + key).on("value", async (snap) => {
                 const data = snap.val();
                 const now = await getServerTime();
-                
-                const isInvalid = !data || 
-                                  data.status !== "active" || 
-                                  (data.expiry && now > data.expiry);
-
-                if (isInvalid) {
+                if (!data || data.status !== "active" || (data.expiry && now > data.expiry)) {
                     localStorage.removeItem("licenseKey");
-                    location.reload(); // Force trigger showUI
+                    location.reload();
                 }
             });
         }
 
-        // Entry Logic
-        if (!storedKey) {
-            showUI();
-        } else {
-            validate(storedKey);
+        if (!storedKey) window.showUI(); else validate(storedKey);
+    }
+
+    // --- 3. LOGIN CONTROLLER LOGIC ---
+    function setupLoginListeners() {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        const loginForm = document.getElementById("login-form");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const loginBtn = document.getElementById("login-submit-btn");
+        const fallbackBadge = document.getElementById("fallback-badge");
+
+        if (window.MMP_Firebase && !MMP_Firebase.isConfigured() && fallbackBadge) {
+            fallbackBadge.style.display = "block";
+        }
+
+        if (window.MMP_Firebase) {
+            MMP_Firebase.onAuthChanged((user) => {
+                if (user) window.location.replace("dashboard.html");
+            });
+        }
+
+        if (loginForm) {
+            loginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+
+                if (!email || !password) return showToast("Fields required", "error");
+                
+                const originalBtnHTML = loginBtn.innerHTML;
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = `Logging in...`;
+
+                try {
+                    await MMP_Firebase.loginUser(email, password);
+                    showToast("Success!", "success");
+                    setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
+                } catch (error) {
+                    showToast(error.message || "Failed", "error");
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = originalBtnHTML;
+                }
+            });
         }
     }
 
-    // Run License Validation
-    loadFirebase(init);
+    function initLoginController() {
+        // If document is already interactive/complete, bind immediately
+        if (document.readyState === "interactive" || document.readyState === "complete") {
+            setupLoginListeners();
+        } else {
+            document.addEventListener("DOMContentLoaded", setupLoginListeners);
+        }
+    }
+
+    // --- UTILITIES ---
+    function showToast(message, type = "info") {
+        const container = document.getElementById("toast-container");
+        if (!container) { alert(message); return; }
+        const toast = document.createElement("div");
+        toast.className = `toast toast-${type}`;
+        toast.innerText = message;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    // START EVERYTHING
+    loadFirebase(initLicenseSystem);
 })();
-
-
-/**
- * MONEY MANAGER PRO - LOGIN CONTROLLER
- * Handles: Login UI Interactions, Form Validation, and Session Routines.
- */
-document.addEventListener("DOMContentLoaded", () => {
-  // Render Lucide Icons
-  lucide.createIcons();
-
-  // Elements
-  const loginForm = document.getElementById("login-form");
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const loginBtn = document.getElementById("login-submit-btn");
-  const fallbackBadge = document.getElementById("fallback-badge");
-
-  // Show mock mode badge if Firebase is running locally
-  if (fallbackBadge && typeof MMP_Firebase !== "undefined" && !MMP_Firebase.isConfigured()) {
-    fallbackBadge.style.display = "block";
-  }
-
-  // Session Check: Redirect to dashboard if user already authenticated
-  if (typeof MMP_Firebase !== "undefined") {
-    MMP_Firebase.onAuthChanged((user) => {
-      if (user) {
-        window.location.replace("dashboard.html");
-      }
-    });
-  }
-
-  // Form submission handler
-  if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-
-      // Client-side Validation
-      if (!email || !password) {
-        showToast("Please fill in all fields.", "error");
-        return;
-      }
-
-      if (!validateEmail(email)) {
-        showToast("Please enter a valid email address.", "error");
-        return;
-      }
-
-      // Set Loading State
-      const originalBtnHTML = loginBtn.innerHTML;
-      loginBtn.disabled = true;
-      loginBtn.innerHTML = `<span class="spinner"></span> <span>Logging in...</span>`;
-
-      try {
-        // Firebase Sign In
-        await MMP_Firebase.loginUser(email, password);
-        showToast("Successfully logged in!", "success");
-        
-        // Redirect after success toast
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 1000);
-      } catch (error) {
-        console.error(error);
-        showToast(error.message || "Authentication failed. Please check credentials.", "error");
-        // Reset button state
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = originalBtnHTML;
-      }
-    });
-  }
-});
-
-// Toast notification helper
-function showToast(message, type = "info") {
-  const container = document.getElementById("toast-container");
-  if (!container) return;
-
-  const toast = document.createElement("div");
-  toast.className = `toast toast-${type}`;
-  
-  let icon = "info";
-  if (type === "success") icon = "check-circle";
-  if (type === "error") icon = "alert-circle";
-  
-  toast.innerHTML = `
-    <i class="toast-icon" data-lucide="${icon}"></i>
-    <div class="toast-message">${message}</div>
-  `;
-  
-  container.appendChild(toast);
-  if (typeof lucide !== "undefined") {
-    lucide.createIcons();
-  }
-  
-  // Slide in effect
-  toast.style.transform = "translateY(0)";
-  
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateY(-10px)";
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
-}
-
-// Simple email validation regex
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
